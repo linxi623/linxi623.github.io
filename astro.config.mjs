@@ -3,5 +3,6 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://linxi.github.io',
+  site: 'https://linxi623.github.io',
+  base: '/Blog',
 });
