@@ -31,8 +31,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check Pages destination
+        run: npx tsx scripts/check-deployment.ts
+
       - name: Build
         run: npm run build
+        env:
+          LINXI_POST_PASSWORD: ${{ secrets.LINXI_POST_PASSWORD }}
+
+      - name: Verify static output
+        run: npm run test:site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

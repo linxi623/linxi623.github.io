@@ -1,0 +1,81 @@
+---
+import { site } from '../config/site';
+import { t, languageNames } from '../lib/i18n';
+import { absolute, localized, withBase, siteBase } from '../lib/urls';
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+import '../styles/markdown.css';
+interface Props { title?: string; description?: string; locale?: string; path?: string; image?: string; article?: boolean; noindex?: boolean; alternates?: boolean; languagePaths?: Record<string, string> }
+const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, noindex = false, alternates = true, languagePaths } = Astro.props;
+const equivalentLocales = site.locales.filter((lang) => !languagePaths || languagePaths[lang] === path);
+const text = t(locale);
+const nav = [
+  ['home', '/', 'house'], ['posts', '/posts/', 'notebook-pen'], ['archives', '/archives/', 'archive'],
+  ['categories', '/categories/', 'folder'], ['tags', '/tags/', 'tags'], ['series', '/series/', 'library'],
+  ['friends', '/friends/', 'link'], ['about', '/about/', 'user-round'],
+] as const;
+const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 的博客`;
+---
+<!doctype html>
+<html lang={locale} data-seasonal={site.seasonal ? 'true' : undefined}>
+  <head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-src 'none'" />}
+    <meta name="description" content={description} /><meta name="color-scheme" content="light dark" />
+    <title>{pageTitle}</title><link rel="icon" href={withBase('/favicon.svg')} />
+    <link rel="canonical" href={new URL(localized(path, locale), site.url).href} />
+    {alternates && equivalentLocales.map((lang) => <link rel="alternate" hreflang={lang} href={new URL(localized(path, lang), site.url).href} />)}
+    {alternates && equivalentLocales.includes(site.defaultLocale) && <link rel="alternate" hreflang="x-default" href={new URL(localized(path, site.defaultLocale), site.url).href} />}
+    <link rel="alternate" type="application/rss+xml" title={text.subscribe} href={localized('/rss.xml', locale)} />
+    <meta property="og:title" content={pageTitle} /><meta property="og:description" content={description} />
+    <meta property="og:type" content={article ? 'article' : 'website'} /><meta property="og:image" content={absolute(image)} />
+    <meta property="og:url" content={new URL(localized(path, locale), site.url).href} /><meta name="twitter:card" content="summary_large_image" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="stylesheet" href={withBase('/katex/katex.min.css')} />
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem('linxi-theme');
+        document.documentElement.classList.toggle('dark', theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches));
+        const size = Number(localStorage.getItem('linxi-font-size'));
+        if (size >= 14 && size <= 24) document.documentElement.style.setProperty('--reading-size', `${size}px`);
+      } catch {}
+    </script>
+  </head>
+  <body data-locale={locale} data-base={siteBase}>
+    <a class="skip-link" href="#main-content">{text.read}</a>
+    <progress id="reading-progress" max="100" value="0" aria-label={text.progress}></progress>
+    <div class="page-shell">
+      <aside class="sidebar" id="site-nav">
+        <a class="brand" href={localized('/', locale)}><img class="avatar" src={withBase(site.avatar)} alt="Linxi" width="64" height="64" /><span class="brand-name">{site.title}</span><span class="eyebrow">LINXI'S JOURNAL</span></a>
+        <p class="sidebar-intro">{text.intro}</p>
+        <nav aria-label={text.home}>{nav.map(([label, href, icon]) => <a href={localized(href, locale)} class:list={{ active: href === '/' ? path === '/' : path.startsWith(href) }} aria-current={(href === '/' ? path === '/' : path.startsWith(href)) ? 'page' : undefined}><Icon name={icon} /><span>{text[label]}</span></a>)}</nav>
+        <div class="sidebar-bottom">
+          <a href={localized('/rss.xml', locale)} class="icon-button" title={text.subscribe} aria-label={text.subscribe}><Icon name="rss" /></a>
+          <a href={site.repository} class="icon-button" title={text.source} aria-label={text.source}><Icon name="github" /></a>
+          <span>{text.footer}</span>
+        </div>
+      </aside>
+      <div class="main-column">
+        <header class="topbar">
+          <button class="icon-button mobile-menu" id="menu-toggle" aria-label={text.home} aria-controls="site-nav" aria-expanded="false" title={text.home}><Icon name="menu" /></button>
+          <span class="breadcrumb">LINXI / {title ?? text.home}</span>
+          <div class="toolbar">
+            <div class="language-control"><Icon name="languages" /><select id="language-select" aria-label={text.translation}>{site.locales.map((lang) => <option value={localized(languagePaths?.[lang] ?? (alternates ? path : '/'), lang)} selected={lang === locale}>{languageNames[lang]}</option>)}</select></div>
+            <button class="icon-button" id="search-open" title={text.search} aria-label={text.search}><Icon name="search" /></button>
+            <button class="icon-button" id="announcement-open" title={text.announcement} aria-label={text.announcement}><Icon name="bell" /></button>
+            <button class="icon-button" id="theme-toggle" title={text.theme} aria-label={text.theme} aria-pressed="false"><Icon name="sun-moon" /></button>
+          </div>
+        </header>
+        <div class="announcement-list" id="announcements" aria-label={text.announcement}>
+          {site.announcements.map((notice) => <div class="announcement" data-notice={notice.id} data-start={notice.startDate} data-end={notice.endDate} hidden><Icon name="megaphone" /><p><strong>{notice.title}</strong> {notice.content}</p><button class="icon-button dismiss-notice" title={text.dismiss} aria-label={text.dismiss}><Icon name="x" /></button></div>)}
+        </div>
+        <main id="main-content"><slot /></main>
+        <footer class="site-footer"><span>© {site.startYear} {site.author}</span><span>Derived from <a href="https://github.com/cosZone/astro-koharu">Astro Koharu</a> by <a href="https://blog.cosine.ren">cosine</a> · AGPL-3.0</span><a href={site.repository}>{text.source}</a></footer>
+      </div>
+    </div>
+    <button id="back-top" class="icon-button back-top" title={text.top} aria-label={text.top} hidden><Icon name="arrow-up" /></button>
+    <dialog id="search-dialog" aria-labelledby="search-title"><div class="dialog-heading"><h2 id="search-title">{text.search}</h2><button class="icon-button close-dialog" title={text.close} aria-label={text.close}><Icon name="x" /></button></div><div id="search-container" data-search-placeholder={text.searchPlaceholder}></div><p id="search-status" role="status"></p></dialog>
+    <dialog id="image-dialog" aria-label={text.fullscreen}><button class="icon-button close-dialog" title={text.close} aria-label={text.close}><Icon name="x" /></button><img id="lightbox-image" alt="" /></dialog>
+    <script>import '../scripts/client';</script>
+  </body>
+</html>

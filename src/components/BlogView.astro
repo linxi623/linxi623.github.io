@@ -1,0 +1,388 @@
+---
+import { render } from "astro:content";
+import { site } from "../config/site";
+import {
+  allPosts,
+  cover,
+  dateLabel,
+  postUrl,
+  readingMinutes,
+  relatedPosts,
+  selectLocale,
+  taxonomyUrl,
+  terms,
+  views,
+  type View,
+} from "../lib/posts";
+import { localized, withBase } from "../lib/urls";
+import { t } from "../lib/i18n";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "./PostCard.astro";
+import Icon from "./Icon.astro";
+interface Props {
+  view: View;
+}
+const { view } = Astro.props;
+const { locale, kind, term, path, page = 1, post } = view;
+const text = t(locale);
+const posts = selectLocale(await allPosts(), locale);
+const routes = await views();
+const languagePaths = Object.fromEntries(site.locales.map((lang) => [
+  lang, routes.some((route) => route.locale === lang && route.path === path) ? path : '/',
+]));
+const title =
+  post?.data.title ?? term ?? (kind === "home" ? undefined : kind === 'post' ? text.posts : text[kind]);
+const rendered = post ? await render(post) : undefined;
+const Content = rendered?.Content;
+const termList = ["tags", "categories", "series"].includes(kind)
+  ? terms(posts, kind as "tags" | "categories" | "series")
+  : [];
+const filtered = term
+  ? posts.filter((entry) =>
+      kind === "series"
+        ? entry.data.series === term
+        : kind === "tags"
+          ? entry.data.tags.includes(term)
+          : entry.data.categories.join("/").startsWith(`${term}/`) ||
+            entry.data.categories.join("/") === term,
+    )
+  : posts;
+const listed =
+  kind === "home"
+    ? posts.slice(0, site.pageSize)
+    : kind === "posts"
+      ? posts.slice((page - 1) * site.pageSize, page * site.pageSize)
+      : filtered;
+const pageCount = Math.max(1, Math.ceil(posts.length / site.pageSize));
+const archiveYears = [
+  ...new Set(posts.map((entry) => entry.data.date.getFullYear())),
+].sort((a, b) => b - a);
+const related = post ? relatedPosts(post, posts) : [];
+const chronological = [...posts].sort(
+  (a, b) => a.data.date.getTime() - b.data.date.getTime(),
+);
+const currentIndex = post
+  ? chronological.findIndex((entry) => entry.data.link === post.data.link)
+  : -1;
+const neighbors = post
+  ? [chronological[currentIndex - 1], chronological[currentIndex + 1]]
+  : [];
+---
+
+<BaseLayout
+  title={title}
+  locale={locale}
+  path={path}
+  languagePaths={languagePaths}
+  description={post?.data.description}
+  image={post ? cover(post) : site.cover}
+  article={kind === "post"}
+>
+  {
+    kind === "home" && (
+      <>
+        <section class="hero">
+          <>
+            <img
+              src={withBase(site.cover)}
+              alt=""
+              width="1920"
+              height="1080"
+              fetchpriority="high"
+            />
+            <div class="hero-content">
+              <>
+                <p class="eyebrow">A LITTLE EVERY DAY</p>
+                <h1>{site.title}</h1>
+                <p>
+                  {text.greeting}
+                  <br />
+                  {text.intro}
+                </p>
+                <a class="button" href={localized("/posts/", locale)}>
+                  {text.all}
+                  <Icon name="arrow-up-right" />
+                </a>
+              </>
+            </div>
+          </>
+        </section>
+        <div class="section-heading">
+          <>
+            <h2>{text.latest}</h2>
+            <a href={localized("/posts/", locale)}>
+              {text.all} <span aria-hidden="true">→</span>
+            </a>
+          </>
+        </div>
+      </>
+    )
+  }
+  {
+    kind !== "home" && kind !== "post" && (
+      <div class="page-heading">
+        <>
+          <p class="eyebrow">LINXI'S JOURNAL</p>
+          <h1>{title}</h1>
+        </>
+      </div>
+    )
+  }
+  {
+    (kind === "home" || kind === "posts" || term) && (
+      <>
+        <div class="post-list">
+          {listed.map((entry) => (
+            <PostCard post={entry} locale={locale} />
+          ))}
+        </div>
+        {listed.length === 0 && <p>{text.empty}</p>}
+        {kind === "posts" && (
+          <nav class="pagination" aria-label={text.posts}>
+            {page > 1 ? (
+              <a
+                class="button secondary"
+                href={localized(
+                  page === 2 ? "/posts/" : `/posts/${page - 1}/`,
+                  locale,
+                )}
+                rel="prev"
+              >
+                {text.previous}
+              </a>
+            ) : (
+              <span />
+            )}
+            <span>
+              {page} / {pageCount}
+            </span>
+            {page < pageCount ? (
+              <a
+                class="button secondary"
+                href={localized(`/posts/${page + 1}/`, locale)}
+                rel="next"
+              >
+                {text.next}
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )}
+      </>
+    )
+  }
+  {
+    ["categories", "tags", "series"].includes(kind) && !term && (
+      <div class="term-list">
+        {termList.map(([name, count]) => (
+          <a href={taxonomyUrl(kind, name, locale)}>
+            <span>{name}</span>
+            <span class="meta">
+              {count}
+              <Icon name="arrow-up-right" />
+            </span>
+          </a>
+        ))}
+        {termList.length === 0 && <p>{text.empty}</p>}
+      </div>
+    )
+  }
+  {
+    kind === "archives" && (
+      <div class="archives">
+        {archiveYears.map((year) => (
+          <section>
+            <h2>{year}</h2>
+            {[...posts]
+              .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+              .filter((entry) => entry.data.date.getFullYear() === year)
+              .map((entry) => (
+                <a href={postUrl(entry, locale)}>
+                  <time datetime={entry.data.date.toISOString()}>
+                    {dateLabel(entry.data.date, locale)}
+                  </time>
+                  <span>{entry.data.title}</span>
+                  <Icon name="arrow-up-right" />
+                </a>
+              ))}
+          </section>
+        ))}
+      </div>
+    )
+  }
+  {
+    kind === "friends" && (
+      <div class="friends-grid">
+        {site.friends.map((friend) => (
+          <a
+            class="friend-card"
+            href={friend.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={withBase(friend.image)}
+              alt={friend.author}
+              width="64"
+              height="64"
+            />
+            <div>
+              <h2>{friend.name}</h2>
+              <p>{friend.description}</p>
+            </div>
+            <Icon name="arrow-up-right" />
+          </a>
+        ))}
+      </div>
+    )
+  }
+  {
+    kind === "about" && (
+      <article class="prose about-content">
+        <>
+          <img
+            class="about-cover"
+            src={withBase("/img/cover/2.webp")}
+            width="960"
+            height="540"
+            alt="小春日和插画"
+          />
+          <h2>Linxi Blog</h2>
+          <h3>关于我</h3>
+          <h3>……和我的新 Astro 网站！</h3>
+          <p>
+            我正在学习 Astro
+            的入门教程。这是我网站上的第二个页面，也是我自己建立的第一页面！
+          </p>
+          <p>
+            随着我完成更多教程，该站点将更新，所以请继续查看我的旅程将如何进行吧！
+          </p>
+          <hr />
+          <p>
+            本站引用并改编自 cosine / cosZone 的{" "}
+            <a href="https://github.com/cosZone/astro-koharu">Astro Koharu</a>
+            ，保留原作者版权与 AGPL-3.0 许可证。由 Linxi 整理为仅部署在 GitHub
+            Pages 的静态博客。
+          </p>
+        </>
+      </article>
+    )
+  }
+  {
+    post && Content && (
+      <>
+        <header class="article-header" data-pagefind-body>
+          <>
+            <div class="meta">
+              <time datetime={post.data.date.toISOString()}>
+                {dateLabel(post.data.date, locale)}
+              </time>
+              {readingMinutes(post) && (
+                <span>
+                  {readingMinutes(post)} {text.minutes}
+                </span>
+              )}
+              {post.data.passwordEnv && <span>{text.encrypted}</span>}
+            </div>
+            <h1 data-pagefind-meta="title">{post.data.title}</h1>
+            <p>{post.data.description}</p>
+            <div class="tags">
+              {post.data.tags.map((tag) => (
+                <a href={taxonomyUrl("tags", tag, locale)}>#{tag}</a>
+              ))}
+            </div>
+            <img
+              class="article-cover"
+              src={cover(post)}
+              alt={post.data.title}
+              width="960"
+              height="540"
+            />
+          </>
+        </header>
+        {post.data.locale !== locale && (
+          <p class="translation-notice">{text.fallback}</p>
+        )}
+        <div class="reading-layout">
+          <>
+            <article
+              class="prose"
+              id="article-content"
+              data-pagefind-body
+              lang={post.data.locale}
+            >
+              <Content />
+            </article>
+            <aside class="reading-sidebar">
+              {post.data.toc && (
+                <details class="toc" open>
+                  <summary>{text.toc}</summary>
+                  <nav id="toc-links" aria-label={text.toc} />
+                </details>
+              )}
+              <details class="reading-settings">
+                <>
+                  <summary>{text.settings}</summary>
+                  <label for="font-size">
+                    {text.fontSize}
+                    <output id="font-size-value">17</output>
+                  </label>
+                  <input
+                    id="font-size"
+                    type="range"
+                    min="14"
+                    max="24"
+                    value="17"
+                  />
+                </>
+              </details>
+            </aside>
+          </>
+        </div>
+        <div class="article-end">
+          {post.data.updated && (
+            <p class="meta">{dateLabel(post.data.updated, locale)}</p>
+          )}
+          <div class="tags">
+            {post.data.categories.map((name, index) => (
+              <a
+                href={taxonomyUrl(
+                  "categories",
+                  post.data.categories.slice(0, index + 1).join("/"),
+                  locale,
+                )}
+              >
+                {name}
+              </a>
+            ))}
+          </div>
+          <nav class="neighbor-posts">
+            {neighbors.map((entry, index) =>
+              entry ? (
+                <a href={postUrl(entry, locale)}>
+                  <small>{index === 0 ? text.previous : text.next}</small>
+                  <strong>{entry.data.title}</strong>
+                </a>
+              ) : (
+                <span />
+              ),
+            )}
+          </nav>
+          {related.length > 0 && (
+            <>
+              <div class="section-heading">
+                <h2>{text.related}</h2>
+              </div>
+              <div class="post-list">
+                {related.map((entry) => (
+                  <PostCard post={entry} locale={locale} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </>
+    )
+  }
+</BaseLayout>

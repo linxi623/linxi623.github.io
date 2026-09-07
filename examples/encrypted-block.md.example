@@ -1,0 +1,19 @@
+---
+title: 局部加密示例
+description: 正文中只有特定区块需要密码。
+date: 2026-09-07
+link: encrypted-block-example
+categories: [笔记]
+tags: [加密]
+cover: /img/cover/8.webp
+---
+
+## 公开内容
+
+这一段任何人都可以阅读。
+
+:::encrypted{env="LINXI_POST_PASSWORD"}
+## 加密区块
+
+这一段只在浏览器正确解锁后显示。
+:::

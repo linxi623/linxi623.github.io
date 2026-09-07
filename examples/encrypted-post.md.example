@@ -1,0 +1,16 @@
+---
+title: 加密文章示例
+description: 此描述公开可见，请勿填写秘密。
+date: 2026-09-07
+link: encrypted-example
+categories: [笔记]
+tags: [加密]
+passwordEnv: LINXI_POST_PASSWORD
+cover: /img/cover/8.webp
+---
+
+## 私密正文
+
+在设置构建环境变量后，将本文件复制为 `src/content/blog/encrypted-example.md`。
+
+注意：如果 Git 仓库公开，本 Markdown 的原始内容仍然公开。真正的秘密应先在本地加密后才提交密文，或使用私有源码仓库。

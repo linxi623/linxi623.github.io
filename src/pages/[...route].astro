@@ -1,0 +1,13 @@
+---
+import BlogView from '../components/BlogView.astro';
+import { views } from '../lib/posts';
+import { site } from '../config/site';
+export async function getStaticPaths() {
+  return (await views()).filter((view) => !(view.locale === site.defaultLocale && ['home', 'about'].includes(view.kind))).map((view) => ({
+    params: { route: (view.locale === site.defaultLocale ? '' : view.locale + '/') + view.path.slice(1, -1) },
+    props: { view },
+  }));
+}
+const { view } = Astro.props;
+---
+<BlogView view={view} />

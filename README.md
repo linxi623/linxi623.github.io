@@ -1,43 +1,91 @@
-# Astro Starter Kit: Minimal
+# Linxi Blog · 小春日和
+
+基于 Astro 的个人静态博客，**仅部署到 GitHub Pages，不需要额外 API 或运行时后端**。
+
+## 原作者与项目来源
+
+**本项目引用并改编自 [cosine / cosZone](https://github.com/cosZone) 的 [Astro Koharu](https://github.com/cosZone/astro-koharu)，不是从零原创的博客主题。**
+
+迁移参考 `learning_blog/astro-koharu` 的 6.3.0 版本。复用了上游的 Shoka Markdown 插件、AES-GCM 加解密实现、头像、封面和 KaTeX 静态资源；Linxi Blog 的页面组织、静态部署限制、浏览器交互及测试是在这些基础上的适配。感谢原作者！
+
+- 上游博客：[余弦の博客](https://blog.cosine.ren)
+- 保留原始 [AGPL-3.0 许可证](LICENSE)。
+- 具体来源、修改说明和资源说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+- 本项目不代表原作者，也不是上游官方发行版。
+
+![首页使用的本地封面](public/img/site_header_800.webp)
+
+## 开始使用
+
+需要 Node.js 22.12+ 和 npm，在 `linxi-blog` 目录执行：
 
 ```sh
-npm create astro@latest -- --template minimal
+npm ci
+npm run dev -- --background
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+终端会显示实际地址，通常为 `http://localhost:4321/`。后台服务管理：
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```sh
+npm run astro -- dev status
+npm run astro -- dev logs
+npm run astro -- dev stop
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+验证生产效果（包括搜索）：
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```sh
+npm run build
+npm run preview -- --background
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+**搜索使用构建产物中的 Pagefind 索引，请在生产预览中验收；开发服务器不提供搜索索引。**
 
-## 🧞 Commands
+## 写一篇文章
 
-All commands are run from the root of the project, from a terminal:
+```sh
+npm run new -- --title "我的第一篇笔记" --slug first-note
+```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+文章写入 `src/content/blog/zh/first-note.md`，默认为草稿。编辑正文、摘要和标签，发布时将 `draft` 改为 `false`，再构建并推送。
 
-## 👀 Want to learn more?
+## 功能
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Markdown 文章、草稿、置顶、分页、归档、多级分类、标签、系列和相关文章。
+- 中文、英文、日文、韩文 UI；人工翻译文章；缺少翻译时回退中文。
+- 本地全文搜索、明暗切换、阅读字号、阅读时间、进度和目录。
+- 图片放大、本地封面、小尺寸图片占位符；不使用外部图床。
+- Shoka 提醒块、折叠、标签页、文字特效、注音、隐藏文字、练习题、代码工具和数学公式。
+- 本地渲染 Mermaid / Infographic；本地音视频播放列表。
+- 无后端公告与已读状态、友链、自定义 Markdown 页面。
+- 整篇及局部加密、各语言 RSS、站点地图、SEO 元数据。
+- 可选轻量飘雪，默认关闭，尊重减少动态效果的系统设置。
+
+完整配置、逐项迁移说明及限制见 **[使用与迁移指南](KOHARU-MIGRATION-GUIDE.zh-CN.md)**。
+
+## GitHub Pages
+
+唯一发布入口为 `.github/workflows/deploy.yml`，只上传 `dist/`。
+
+站点配置集中在 `src/config/site.ts`。当前配置是用户站点 `https://linxi623.github.io`，没有项目路径前缀。如果发布到项目仓库 `Blog`，必须加上 `base: '/Blog'` 并将 `repository` 改为对应仓库地址。
+
+**迁移时发现本地 Git 远端仍为 `linxi623/Blog`，而站点配置已改为 `linxi623/linxi623.github.io`。推送前请确认最终仓库；本次未擅自修改远端或执行发布。** 工作流会检查仓库与路径，避免误发布。
+
+## 检查
+
+```sh
+npm test
+npm run check
+npm run build
+npm run test:site
+npm run test:browser
+npm run test:encryption
+```
+
+浏览器测试默认使用本机 Google Chrome。加密集成测试会临时创建测试文章，结束后清理它们并恢复普通构建；不要与其他构建命令并发运行。
+
+## 安全边界
+
+加密文章仅保护发布后的网页正文，**不能保护公开 Git 仓库中的 Markdown 原文**。标题、摘要、日期、标签和封面始终公开。密码从构建环境变量读取，不写进文章；生产产物只发布静态文件。
+
+未迁移评论、在线统计、Bangumi、动态碎碎念、Meting、AI 摘要、远程嵌入和 CMS API。普通外部超链接可以保留，但站点自身的脚本、字体、图片、媒体和数据请求限定为本站来源。

@@ -1,0 +1,13 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { siteBase } from '../lib/urls';
+import { site } from '../config/site';
+interface Props { frontmatter: { title: string; description?: string; locale?: string } }
+const { title, description, locale = 'zh' } = Astro.props.frontmatter;
+const rawPath = Astro.url.pathname.slice(siteBase.length);
+const path = locale !== site.defaultLocale && rawPath.startsWith(`/${locale}/`) ? rawPath.slice(locale.length + 1) : rawPath;
+---
+<BaseLayout title={title} description={description} locale={locale} path={path} alternates={false}>
+  <div class="page-heading"><h1>{title}</h1></div>
+  <article class="prose"><slot /></article>
+</BaseLayout>
