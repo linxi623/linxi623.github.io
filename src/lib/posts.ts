@@ -37,11 +37,13 @@ export function readingMinutes(post: Post) {
   const body = post.body ?? '';
   return Math.max(1, Math.ceil((body.match(/[\u3400-\u9fff]/g)?.length ?? 0) / 350 + body.split(/\s+/).length / 220));
 }
-export function terms(posts: Post[], key: 'tags' | 'categories' | 'series') {
+export function wordCount(post: Post) {
+  return (post.body ?? '').trim().split(/\s+/).filter(Boolean).length;
+}
+export function terms(posts: Post[], key: 'tags' | 'categories') {
   const counts = new Map<string, number>();
   for (const post of posts) {
-    const values = key === 'series' ? [post.data.series].filter(Boolean) as string[]
-      : key === 'categories'
+    const values = key === 'categories'
         ? post.data.categories.map((_, index) => post.data.categories.slice(0, index + 1).join('/'))
         : post.data.tags;
     for (const value of new Set(values)) counts.set(value, (counts.get(value) ?? 0) + 1);
@@ -68,10 +70,10 @@ export async function views() {
   for (const locale of site.locales) {
     const posts = selectLocale(all, locale);
     result.push({ locale, kind: 'home', path: '/' });
-    for (const kind of ['archives', 'categories', 'tags', 'series', 'friends', 'about'] as const) result.push({ locale, kind, path: `/${kind}/` });
+    for (const kind of ['archives', 'categories', 'tags', 'about'] as const) result.push({ locale, kind, path: `/${kind}/` });
     const pages = Math.max(1, Math.ceil(posts.length / site.pageSize));
     for (let page = 1; page <= pages; page++) result.push({ locale, kind: 'posts', page, path: page === 1 ? '/posts/' : `/posts/${page}/` });
-    for (const key of ['categories', 'tags', 'series'] as const) {
+    for (const key of ['categories', 'tags'] as const) {
       for (const [term] of terms(posts, key)) result.push({ locale, kind: key, term, path: `/${key}/${term}/` });
     }
     for (const post of posts) result.push({ locale, kind: 'post', post, path: `/post/${post.data.link}/` });

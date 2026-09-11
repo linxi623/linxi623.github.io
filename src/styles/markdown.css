@@ -1,13 +1,17 @@
-.prose { min-width: 0; font-size: var(--reading-size); line-height: 1.95; overflow-wrap: anywhere; }
+.prose { min-width: 0; max-width: 760px; margin: 0 auto; font-size: var(--reading-size); line-height: 2; overflow-wrap: anywhere; }
 .prose > :first-child { margin-top: 0; }
 .prose h2 { font-size: 25px; margin: 1.8em 0 .8em; border-bottom: 1px solid var(--line); padding-bottom: .35em; }
 .prose h3 { font-size: 20px; margin-top: 1.7em; }
+.prose h1, .prose h2, .prose h3 { color: var(--ink); letter-spacing: 0; }
+.prose h2 { border-bottom: 2px solid var(--soft); padding-bottom: .45em; }
+.prose h3 { color: var(--accent); }
+.prose p { margin: 1.1em 0; }
 .prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
 .prose img { display: block; max-height: 650px; object-fit: contain; margin: 22px auto; cursor: zoom-in; }
 .prose .about-cover { object-fit: cover; width: 100%; aspect-ratio: 2.5; }
 .prose ul, .prose ol { padding-left: 1.5em; }
 .prose li + li { margin-top: 6px; }
-.prose blockquote { margin: 24px 0; border-left: 3px solid var(--accent); padding: 1px 20px; background: var(--soft); color: var(--muted); }
+.prose blockquote { margin: 24px 0; border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1px 20px; background: var(--soft); color: var(--muted); }
 .prose hr { border: 0; border-top: 1px solid var(--line); margin: 30px 0; }
 .prose :not(pre) > code { font-size: .86em; background: var(--soft); padding: 2px 5px; border-radius: 3px; }
 .prose pre { max-width: 100%; overflow: auto; padding: 18px; font-size: 13px; line-height: 1.8; margin: 0; tab-size: 2; border: 1px solid var(--line); }

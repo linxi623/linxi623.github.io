@@ -39,8 +39,13 @@ const preview = placeholder(cover(post));
   </a>
   <div class="post-card-body">
     <div class="meta">
+      {post.data.categories[0] && (
+        <a href={taxonomyUrl("categories", post.data.categories[0], locale)}>
+          <Icon name="folder" /> {post.data.categories[0]}
+        </a>
+      )}
       <time datetime={post.data.date.toISOString()}
-        >{dateLabel(post.data.date, locale)}</time
+        ><Icon name="calendar" /> {dateLabel(post.data.date, locale)}</time
       >{post.data.pinned && <span class="accent">{text.pinned}</span>}{
         post.data.passwordEnv && <Icon name="lock-keyhole" />
       }
@@ -51,13 +56,13 @@ const preview = placeholder(cover(post));
       <div class="tags">
         {
           post.data.tags
-            .slice(0, 2)
+            .slice(0, 3)
             .map((tag) => <a href={taxonomyUrl("tags", tag, locale)}>#{tag}</a>)
         }
       </div>{
         minutes && (
           <span class="meta">
-            {minutes} {text.minutes}
+            <Icon name="clock" /> {minutes} {text.minutes}
           </span>
         )
       }

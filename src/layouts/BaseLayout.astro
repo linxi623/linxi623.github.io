@@ -1,6 +1,6 @@
 ---
 import { site } from '../config/site';
-import { t, languageNames } from '../lib/i18n';
+import { t } from '../lib/i18n';
 import { absolute, localized, withBase, siteBase } from '../lib/urls';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
@@ -11,8 +11,7 @@ const equivalentLocales = site.locales.filter((lang) => !languagePaths || langua
 const text = t(locale);
 const nav = [
   ['home', '/', 'house'], ['posts', '/posts/', 'notebook-pen'], ['archives', '/archives/', 'archive'],
-  ['categories', '/categories/', 'folder'], ['tags', '/tags/', 'tags'], ['series', '/series/', 'library'],
-  ['friends', '/friends/', 'link'], ['about', '/about/', 'user-round'],
+  ['categories', '/categories/', 'folder'], ['tags', '/tags/', 'tags'], ['about', '/about/', 'user-round'],
 ] as const;
 const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 的博客`;
 ---
@@ -60,7 +59,6 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
           <button class="icon-button mobile-menu" id="menu-toggle" aria-label={text.home} aria-controls="site-nav" aria-expanded="false" title={text.home}><Icon name="menu" /></button>
           <span class="breadcrumb">LINXI / {title ?? text.home}</span>
           <div class="toolbar">
-            <div class="language-control"><Icon name="languages" /><select id="language-select" aria-label={text.translation}>{site.locales.map((lang) => <option value={localized(languagePaths?.[lang] ?? (alternates ? path : '/'), lang)} selected={lang === locale}>{languageNames[lang]}</option>)}</select></div>
             <button class="icon-button" id="search-open" title={text.search} aria-label={text.search}><Icon name="search" /></button>
             <button class="icon-button" id="announcement-open" title={text.announcement} aria-label={text.announcement}><Icon name="bell" /></button>
             <button class="icon-button" id="theme-toggle" title={text.theme} aria-label={text.theme} aria-pressed="false"><Icon name="sun-moon" /></button>

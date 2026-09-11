@@ -7,6 +7,7 @@ import {
   dateLabel,
   postUrl,
   readingMinutes,
+  wordCount,
   relatedPosts,
   selectLocale,
   taxonomyUrl,
@@ -34,14 +35,15 @@ const title =
   post?.data.title ?? term ?? (kind === "home" ? undefined : kind === 'post' ? text.posts : text[kind]);
 const rendered = post ? await render(post) : undefined;
 const Content = rendered?.Content;
-const termList = ["tags", "categories", "series"].includes(kind)
-  ? terms(posts, kind as "tags" | "categories" | "series")
+const termList = ["tags", "categories"].includes(kind)
+  ? terms(posts, kind as "tags" | "categories")
+  : [];
+const categoryCards = kind === "categories"
+  ? termList.map(([name, count]) => ({ name, count, posts: posts.filter((entry) => entry.data.categories.join("/").startsWith(name)) }))
   : [];
 const filtered = term
   ? posts.filter((entry) =>
-      kind === "series"
-        ? entry.data.series === term
-        : kind === "tags"
+      kind === "tags"
           ? entry.data.tags.includes(term)
           : entry.data.categories.join("/").startsWith(`${term}/`) ||
             entry.data.categories.join("/") === term,
@@ -173,17 +175,21 @@ const neighbors = post
     )
   }
   {
-    ["categories", "tags", "series"].includes(kind) && !term && (
-      <div class="term-list">
-        {termList.map(([name, count]) => (
-          <a href={taxonomyUrl(kind, name, locale)}>
-            <span>{name}</span>
-            <span class="meta">
-              {count}
-              <Icon name="arrow-up-right" />
+    ["categories", "tags"].includes(kind) && !term && (
+      <div class:list={["term-list", { "category-grid": kind === "categories" }]}>
+        {(kind === "categories" ? categoryCards : termList).map((item) => {
+          const name = Array.isArray(item) ? item[0] : item.name;
+          const count = Array.isArray(item) ? item[1] : item.count;
+          const preview = Array.isArray(item) ? [] : item.posts.slice(0, 3);
+          return <a class="term-card" href={taxonomyUrl(kind, name, locale)}>
+            {preview[0] && <img src={cover(preview[0])} alt="" loading="lazy" />}
+            <span class="term-card-content">
+              <strong>{name}</strong>
+              {preview.length > 0 && <span class="term-card-posts">{preview.map((entry) => entry.data.title).join(" · ")}</span>}
+              <span class="meta">{count} {locale === "zh" ? "篇文章" : "posts"}<Icon name="arrow-up-right" /></span>
             </span>
-          </a>
-        ))}
+          </a>;
+        })}
         {termList.length === 0 && <p>{text.empty}</p>}
       </div>
     )
@@ -207,32 +213,6 @@ const neighbors = post
                 </a>
               ))}
           </section>
-        ))}
-      </div>
-    )
-  }
-  {
-    kind === "friends" && (
-      <div class="friends-grid">
-        {site.friends.map((friend) => (
-          <a
-            class="friend-card"
-            href={friend.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src={withBase(friend.image)}
-              alt={friend.author}
-              width="64"
-              height="64"
-            />
-            <div>
-              <h2>{friend.name}</h2>
-              <p>{friend.description}</p>
-            </div>
-            <Icon name="arrow-up-right" />
-          </a>
         ))}
       </div>
     )
@@ -274,12 +254,17 @@ const neighbors = post
       <>
         <header class="article-header" data-pagefind-body>
           <>
+            <nav class="article-breadcrumb" aria-label="Breadcrumb">
+              <a href={localized("/", locale)}>{text.home}</a><Icon name="chevron-right" />
+              {post.data.categories.map((name, index) => <><a href={taxonomyUrl("categories", post.data.categories.slice(0, index + 1).join("/"), locale)}>{name}</a>{index < post.data.categories.length - 1 && <Icon name="chevron-right" />}</>)}
+            </nav>
             <div class="meta">
-              <time datetime={post.data.date.toISOString()}>
+              <time datetime={post.data.date.toISOString()}><Icon name="calendar" />
                 {dateLabel(post.data.date, locale)}
               </time>
+              <span><Icon name="file-text" /> {wordCount(post)} 字</span>
               {readingMinutes(post) && (
-                <span>
+                <span><Icon name="clock" />
                   {readingMinutes(post)} {text.minutes}
                 </span>
               )}

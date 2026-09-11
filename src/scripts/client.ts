@@ -1,4 +1,4 @@
-import { createIcons, ArrowUp, ArrowUpRight, Archive, Bell, Check, Copy, Folder, Github, House, Languages, Library, Link, LockKeyhole, Maximize, Megaphone, Menu, NotebookPen, Rss, Search, SunMoon, Tags, UserRound, X } from 'lucide';
+import { createIcons, ArrowUp, ArrowUpRight, Archive, Bell, Calendar, Check, Clock, Copy, Folder, Github, House, Library, Link, LockKeyhole, Maximize, Megaphone, Menu, NotebookPen, Rss, Search, SunMoon, Tags, UserRound, X } from 'lucide';
 import { t } from '../lib/i18n';
 import { decryptContent } from '../lib/crypto/decrypt';
 
@@ -6,7 +6,7 @@ const text = t(document.body.dataset.locale ?? 'zh');
 const base = document.body.dataset.base ?? '';
 const $ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => root.querySelector<T>(selector);
 const $$ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => [...root.querySelectorAll<T>(selector)];
-const icons = { ArrowUp, ArrowUpRight, Archive, Bell, Check, Copy, Folder, Github, House, Languages, Library, Link, LockKeyhole, Maximize, Megaphone, Menu, NotebookPen, Rss, Search, SunMoon, Tags, UserRound, X };
+const icons = { ArrowUp, ArrowUpRight, Archive, Bell, Calendar, Check, Clock, Copy, Folder, Github, House, Library, Link, LockKeyhole, Maximize, Megaphone, Menu, NotebookPen, Rss, Search, SunMoon, Tags, UserRound, X };
 function refreshIcons() { createIcons({ icons, attrs: { 'aria-hidden': 'true', class: 'icon' } }); }
 function iconButton(name: string, label: string) {
   const button = document.createElement('button');
@@ -25,7 +25,6 @@ themeButton?.addEventListener('click', () => {
   const dark = document.documentElement.classList.toggle('dark');
   writeStorage('linxi-theme', dark ? 'dark' : 'light'); updateThemeState();
 });
-$('#language-select')?.addEventListener('change', (event) => { location.href = (event.target as HTMLSelectElement).value; });
 $('#menu-toggle')?.addEventListener('click', () => {
   const opened = $('#site-nav')?.classList.toggle('open');
   $('#menu-toggle')?.setAttribute('aria-expanded', String(opened));
