@@ -9,6 +9,7 @@ interface Props { title?: string; description?: string; locale?: string; path?: 
 const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, noindex = false, alternates = true, languagePaths } = Astro.props;
 const equivalentLocales = site.locales.filter((lang) => !languagePaths || languagePaths[lang] === path);
 const text = t(locale);
+const coverTitle = title ?? site.title;
 const nav = [
   ['home', '/', 'house'], ['posts', '/posts/', 'notebook-pen'], ['archives', '/archives/', 'archive'],
   ['categories', '/categories/', 'folder'], ['tags', '/tags/', 'tags'], ['about', '/about/', 'user-round'],
@@ -40,9 +41,31 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
       } catch {}
     </script>
   </head>
-  <body data-locale={locale} data-base={siteBase}>
+  <body data-locale={locale} data-base={siteBase} data-article={article ? 'true' : undefined}>
     <a class="skip-link" href="#main-content">{text.read}</a>
     <progress id="reading-progress" max="100" value="0" aria-label={text.progress}></progress>
+    <header class="site-header">
+      <div class="topbar">
+        <button class="icon-button mobile-menu" id="menu-toggle" aria-label={text.home} aria-controls="site-nav" aria-expanded="false" title={text.home}><Icon name="menu" /></button>
+        <a class="header-brand" href={localized('/', locale)}>{site.title}</a>
+        <span class="breadcrumb">LINXI / {coverTitle}</span>
+        <div class="toolbar">
+          <button class="icon-button" id="search-open" title={text.search} aria-label={text.search}><Icon name="search" /></button>
+          <button class="icon-button" id="announcement-open" title={text.announcement} aria-label={text.announcement}><Icon name="bell" /></button>
+          <button class="icon-button" id="theme-toggle" title={text.theme} aria-label={text.theme} aria-pressed="false"><Icon name="sun-moon" /></button>
+        </div>
+      </div>
+    </header>
+    <section class="cover-banner" aria-labelledby="cover-title">
+      <img src={withBase(article ? site.cover : image || site.cover)} alt="" width="1920" height="1080" fetchpriority="high" />
+      <div class="cover-overlay"></div>
+      <div class="cover-content">
+        {path === '/' && <p class="eyebrow">A LITTLE EVERY DAY</p>}
+        <h1 id="cover-title">{coverTitle}</h1>
+        {path === '/' && <p>{text.greeting}<br />{text.intro}</p>}
+      </div>
+      <div class="cover-wave" aria-hidden="true"></div>
+    </section>
     <div class="page-shell">
       <aside class="sidebar" id="site-nav">
         <a class="brand" href={localized('/', locale)}><img class="avatar" src={withBase(site.avatar)} alt="Linxi" width="64" height="64" /><span class="brand-name">{site.title}</span><span class="eyebrow">LINXI'S JOURNAL</span></a>
@@ -54,16 +77,7 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
           <span>{text.footer}</span>
         </div>
       </aside>
-      <div class="main-column">
-        <header class="topbar">
-          <button class="icon-button mobile-menu" id="menu-toggle" aria-label={text.home} aria-controls="site-nav" aria-expanded="false" title={text.home}><Icon name="menu" /></button>
-          <span class="breadcrumb">LINXI / {title ?? text.home}</span>
-          <div class="toolbar">
-            <button class="icon-button" id="search-open" title={text.search} aria-label={text.search}><Icon name="search" /></button>
-            <button class="icon-button" id="announcement-open" title={text.announcement} aria-label={text.announcement}><Icon name="bell" /></button>
-            <button class="icon-button" id="theme-toggle" title={text.theme} aria-label={text.theme} aria-pressed="false"><Icon name="sun-moon" /></button>
-          </div>
-        </header>
+      <div class:list={["main-column", { "home-column": path === "/" }]}>
         <div class="announcement-list" id="announcements" aria-label={text.announcement}>
           {site.announcements.map((notice) => <div class="announcement" data-notice={notice.id} data-start={notice.startDate} data-end={notice.endDate} hidden><Icon name="megaphone" /><p><strong>{notice.title}</strong> {notice.content}</p><button class="icon-button dismiss-notice" title={text.dismiss} aria-label={text.dismiss}><Icon name="x" /></button></div>)}
         </div>

@@ -1,4 +1,4 @@
-.prose { min-width: 0; max-width: 760px; margin: 0 auto; font-size: var(--reading-size); line-height: 2; overflow-wrap: anywhere; }
+.prose { min-width: 0; max-width: none; margin: 0; font-size: var(--reading-size); line-height: 2; overflow-wrap: anywhere; }
 .prose > :first-child { margin-top: 0; }
 .prose h2 { font-size: 25px; margin: 1.8em 0 .8em; border-bottom: 1px solid var(--line); padding-bottom: .35em; }
 .prose h3 { font-size: 20px; margin-top: 1.7em; }

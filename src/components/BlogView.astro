@@ -83,32 +83,6 @@ const neighbors = post
   {
     kind === "home" && (
       <>
-        <section class="hero">
-          <>
-            <img
-              src={withBase(site.cover)}
-              alt=""
-              width="1920"
-              height="1080"
-              fetchpriority="high"
-            />
-            <div class="hero-content">
-              <>
-                <p class="eyebrow">A LITTLE EVERY DAY</p>
-                <h1>{site.title}</h1>
-                <p>
-                  {text.greeting}
-                  <br />
-                  {text.intro}
-                </p>
-                <a class="button" href={localized("/posts/", locale)}>
-                  {text.all}
-                  <Icon name="arrow-up-right" />
-                </a>
-              </>
-            </div>
-          </>
-        </section>
         <div class="section-heading">
           <>
             <h2>{text.latest}</h2>
@@ -254,6 +228,7 @@ const neighbors = post
       <>
         <header class="article-header" data-pagefind-body>
           <>
+            <h1 class="article-title-meta" data-pagefind-meta="title">{post.data.title}</h1>
             <nav class="article-breadcrumb" aria-label="Breadcrumb">
               <a href={localized("/", locale)}>{text.home}</a><Icon name="chevron-right" />
               {post.data.categories.map((name, index) => <><a href={taxonomyUrl("categories", post.data.categories.slice(0, index + 1).join("/"), locale)}>{name}</a>{index < post.data.categories.length - 1 && <Icon name="chevron-right" />}</>)}
@@ -270,20 +245,12 @@ const neighbors = post
               )}
               {post.data.passwordEnv && <span>{text.encrypted}</span>}
             </div>
-            <h1 data-pagefind-meta="title">{post.data.title}</h1>
             <p>{post.data.description}</p>
             <div class="tags">
               {post.data.tags.map((tag) => (
                 <a href={taxonomyUrl("tags", tag, locale)}>#{tag}</a>
               ))}
             </div>
-            <img
-              class="article-cover"
-              src={cover(post)}
-              alt={post.data.title}
-              width="960"
-              height="540"
-            />
           </>
         </header>
         {post.data.locale !== locale && (
@@ -291,14 +258,6 @@ const neighbors = post
         )}
         <div class="reading-layout">
           <>
-            <article
-              class="prose"
-              id="article-content"
-              data-pagefind-body
-              lang={post.data.locale}
-            >
-              <Content />
-            </article>
             <aside class="reading-sidebar">
               {post.data.toc && (
                 <details class="toc" open>
@@ -323,6 +282,14 @@ const neighbors = post
                 </>
               </details>
             </aside>
+            <article
+              class="prose"
+              id="article-content"
+              data-pagefind-body
+              lang={post.data.locale}
+            >
+              <Content />
+            </article>
           </>
         </div>
         <div class="article-end">
