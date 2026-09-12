@@ -5,15 +5,25 @@ import { absolute, localized, withBase, siteBase } from '../lib/urls';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 import '../styles/markdown.css';
-interface Props { title?: string; description?: string; locale?: string; path?: string; image?: string; article?: boolean; noindex?: boolean; alternates?: boolean; languagePaths?: Record<string, string> }
-const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, noindex = false, alternates = true, languagePaths } = Astro.props;
+interface Props { title?: string; description?: string; locale?: string; path?: string; image?: string; article?: boolean; articleMeta?: { date: string; updated?: string; words: number; minutes?: number | null }; noindex?: boolean; alternates?: boolean; languagePaths?: Record<string, string> }
+const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, articleMeta, noindex = false, alternates = true, languagePaths } = Astro.props;
 const equivalentLocales = site.locales.filter((lang) => !languagePaths || languagePaths[lang] === path);
 const text = t(locale);
 const coverTitle = title ?? site.title;
 const nav = [
-  ['home', '/', 'house'], ['posts', '/posts/', 'notebook-pen'], ['archives', '/archives/', 'archive'],
-  ['categories', '/categories/', 'folder'], ['tags', '/tags/', 'tags'], ['about', '/about/', 'user-round'],
+  { label: 'home', href: '/', icon: 'house' },
+  {
+    label: 'posts',
+    icon: 'notebook-pen',
+    children: [
+      { label: 'categories', href: '/categories/', icon: 'folder' },
+      { label: 'tags', href: '/tags/', icon: 'tags' },
+      { label: 'archives', href: '/archives/', icon: 'archive' },
+    ],
+  },
+  { label: 'about', href: '/about/', icon: 'user-round' },
 ] as const;
+const articleNavActive = ['/posts/', '/categories/', '/tags/', '/archives/'].some((href) => path.startsWith(href));
 const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 的博客`;
 ---
 <!doctype html>
@@ -63,6 +73,12 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
         {path === '/' && <p class="eyebrow">A LITTLE EVERY DAY</p>}
         <h1 id="cover-title">{coverTitle}</h1>
         {path === '/' && <p>{text.greeting}<br />{text.intro}</p>}
+        {article && articleMeta && <div class="cover-meta">
+          <span><Icon name="calendar" /> {text.date} {articleMeta.date}</span>
+          {articleMeta.updated && <span><Icon name="calendar" /> {articleMeta.updated}</span>}
+          <span><Icon name="file-text" /> {articleMeta.words} 字</span>
+          {articleMeta.minutes && <span><Icon name="clock" /> {articleMeta.minutes} {text.minutes}</span>}
+        </div>}
       </div>
       <div class="cover-wave" aria-hidden="true"></div>
     </section>
@@ -70,7 +86,23 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
       <aside class="sidebar" id="site-nav">
         <a class="brand" href={localized('/', locale)}><img class="avatar" src={withBase(site.avatar)} alt="Linxi" width="64" height="64" /><span class="brand-name">{site.title}</span><span class="eyebrow">LINXI'S JOURNAL</span></a>
         <p class="sidebar-intro">{text.intro}</p>
-        <nav aria-label={text.home}>{nav.map(([label, href, icon]) => <a href={localized(href, locale)} class:list={{ active: href === '/' ? path === '/' : path.startsWith(href) }} aria-current={(href === '/' ? path === '/' : path.startsWith(href)) ? 'page' : undefined}><Icon name={icon} /><span>{text[label]}</span></a>)}</nav>
+        <nav aria-label={text.home}>
+          {nav.map((item) => item.children ? (
+            <details class="nav-group" open={articleNavActive}>
+              <summary class:list={{ active: articleNavActive }}>
+                <Icon name={item.icon} /><span>{text[item.label]}</span>
+              </summary>
+              <div class="nav-subnav">
+                {item.children.map((child) => {
+                  const active = path.startsWith(child.href);
+                  return <a href={localized(child.href, locale)} class:list={{ active }} aria-current={active ? 'page' : undefined}><Icon name={child.icon} /><span>{text[child.label]}</span></a>;
+                })}
+              </div>
+            </details>
+          ) : (
+            <a href={localized(item.href, locale)} class:list={{ active: item.href === '/' ? path === '/' : path.startsWith(item.href) }} aria-current={(item.href === '/' ? path === '/' : path.startsWith(item.href)) ? 'page' : undefined}><Icon name={item.icon} /><span>{text[item.label]}</span></a>
+          ))}
+        </nav>
         <div class="sidebar-bottom">
           <a href={localized('/rss.xml', locale)} class="icon-button" title={text.subscribe} aria-label={text.subscribe}><Icon name="rss" /></a>
           <a href={site.repository} class="icon-button" title={text.source} aria-label={text.source}><Icon name="github" /></a>

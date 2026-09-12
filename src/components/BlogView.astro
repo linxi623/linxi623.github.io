@@ -79,6 +79,7 @@ const neighbors = post
   description={post?.data.description}
   image={post ? cover(post) : site.cover}
   article={kind === "post"}
+  articleMeta={post ? { date: dateLabel(post.data.date, locale), updated: post.data.updated ? dateLabel(post.data.updated, locale) : undefined, words: wordCount(post), minutes: readingMinutes(post) } : undefined}
 >
   {
     kind === "home" && (
@@ -226,36 +227,6 @@ const neighbors = post
   {
     post && Content && (
       <>
-        <header class="article-header" data-pagefind-body>
-          <>
-            <h1 class="article-title-meta" data-pagefind-meta="title">{post.data.title}</h1>
-            <nav class="article-breadcrumb" aria-label="Breadcrumb">
-              <a href={localized("/", locale)}>{text.home}</a><Icon name="chevron-right" />
-              {post.data.categories.map((name, index) => <><a href={taxonomyUrl("categories", post.data.categories.slice(0, index + 1).join("/"), locale)}>{name}</a>{index < post.data.categories.length - 1 && <Icon name="chevron-right" />}</>)}
-            </nav>
-            <div class="meta">
-              <time datetime={post.data.date.toISOString()}><Icon name="calendar" />
-                {dateLabel(post.data.date, locale)}
-              </time>
-              <span><Icon name="file-text" /> {wordCount(post)} 字</span>
-              {readingMinutes(post) && (
-                <span><Icon name="clock" />
-                  {readingMinutes(post)} {text.minutes}
-                </span>
-              )}
-              {post.data.passwordEnv && <span>{text.encrypted}</span>}
-            </div>
-            <p>{post.data.description}</p>
-            <div class="tags">
-              {post.data.tags.map((tag) => (
-                <a href={taxonomyUrl("tags", tag, locale)}>#{tag}</a>
-              ))}
-            </div>
-          </>
-        </header>
-        {post.data.locale !== locale && (
-          <p class="translation-notice">{text.fallback}</p>
-        )}
         <div class="reading-layout">
           <>
             <aside class="reading-sidebar">
@@ -282,57 +253,72 @@ const neighbors = post
                 </>
               </details>
             </aside>
-            <article
-              class="prose"
-              id="article-content"
-              data-pagefind-body
-              lang={post.data.locale}
-            >
-              <Content />
-            </article>
-          </>
-        </div>
-        <div class="article-end">
-          {post.data.updated && (
-            <p class="meta">{dateLabel(post.data.updated, locale)}</p>
-          )}
-          <div class="tags">
-            {post.data.categories.map((name, index) => (
-              <a
-                href={taxonomyUrl(
-                  "categories",
-                  post.data.categories.slice(0, index + 1).join("/"),
-                  locale,
-                )}
+            <div class="article-column">
+              <header class="article-header" data-pagefind-body>
+                <>
+                  <h1 class="article-title-meta" data-pagefind-meta="title">{post.data.title}</h1>
+                  <nav class="article-breadcrumb" aria-label="Breadcrumb">
+                    <a class="breadcrumb-home" href={localized("/", locale)}><Icon name="house" /><span>{text.home}</span></a>
+                    {post.data.categories.map((name, index) => <><Icon name="chevron-right" /><a class:list={{ "breadcrumb-current": index === post.data.categories.length - 1 }} href={taxonomyUrl("categories", post.data.categories.slice(0, index + 1).join("/"), locale)}>{name}</a></>)}
+                  </nav>
+                  <p>{post.data.description}</p>
+                </>
+              </header>
+              {post.data.locale !== locale && (
+                <p class="translation-notice">{text.fallback}</p>
+              )}
+              <article
+                class="prose"
+                id="article-content"
+                data-pagefind-body
+                lang={post.data.locale}
               >
-                {name}
-              </a>
-            ))}
-          </div>
-          <nav class="neighbor-posts">
-            {neighbors.map((entry, index) =>
-              entry ? (
-                <a href={postUrl(entry, locale)}>
-                  <small>{index === 0 ? text.previous : text.next}</small>
-                  <strong>{entry.data.title}</strong>
-                </a>
-              ) : (
-                <span />
-              ),
-            )}
-          </nav>
-          {related.length > 0 && (
-            <>
-              <div class="section-heading">
-                <h2>{text.related}</h2>
+                <Content />
+              </article>
+              <div class="article-end">
+                {post.data.updated && (
+                  <p class="meta">{dateLabel(post.data.updated, locale)}</p>
+                )}
+                <div class="tags">
+                  {post.data.categories.map((name, index) => (
+                    <a
+                      href={taxonomyUrl(
+                        "categories",
+                        post.data.categories.slice(0, index + 1).join("/"),
+                        locale,
+                      )}
+                    >
+                      {name}
+                    </a>
+                  ))}
+                </div>
+                <nav class="neighbor-posts">
+                  {neighbors.map((entry, index) =>
+                    entry ? (
+                      <a href={postUrl(entry, locale)}>
+                        <small>{index === 0 ? text.previous : text.next}</small>
+                        <strong>{entry.data.title}</strong>
+                      </a>
+                    ) : (
+                      <span />
+                    ),
+                  )}
+                </nav>
+                {related.length > 0 && (
+                  <>
+                    <div class="section-heading">
+                      <h2>{text.related}</h2>
+                    </div>
+                    <div class="post-list">
+                      {related.map((entry) => (
+                        <PostCard post={entry} locale={locale} />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              <div class="post-list">
-                {related.map((entry) => (
-                  <PostCard post={entry} locale={locale} />
-                ))}
-              </div>
-            </>
-          )}
+            </div>
+          </>
         </div>
       </>
     )
