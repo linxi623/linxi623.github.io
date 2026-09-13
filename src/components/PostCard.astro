@@ -15,7 +15,7 @@ interface Props {
   locale: string;
 }
 const { post, locale } = Astro.props;
-const text = t(locale);
+const text = t();
 const minutes = readingMinutes(post);
 const preview = placeholder(cover(post));
 ---

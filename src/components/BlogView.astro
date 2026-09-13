@@ -12,7 +12,6 @@ import {
   selectLocale,
   taxonomyUrl,
   terms,
-  views,
   type View,
 } from "../lib/posts";
 import { localized, withBase } from "../lib/urls";
@@ -25,14 +24,9 @@ interface Props {
 }
 const { view } = Astro.props;
 const { locale, kind, term, path, page = 1, post } = view;
-const text = t(locale);
+const text = t();
 const posts = selectLocale(await allPosts(), locale);
-const routes = await views();
-const languagePaths = Object.fromEntries(site.locales.map((lang) => [
-  lang, routes.some((route) => route.locale === lang && route.path === path) ? path : '/',
-]));
-const title =
-  post?.data.title ?? term ?? (kind === "home" ? undefined : kind === 'post' ? text.posts : text[kind]);
+const title = post?.data.title ?? term ?? (kind === 'home' ? undefined : kind === 'post' ? text.posts : text[kind]);
 const rendered = post ? await render(post) : undefined;
 const Content = rendered?.Content;
 const termList = ["tags", "categories"].includes(kind)
@@ -75,7 +69,6 @@ const neighbors = post
   title={title}
   locale={locale}
   path={path}
-  languagePaths={languagePaths}
   description={post?.data.description}
   image={post ? cover(post) : site.cover}
   article={kind === "post"}

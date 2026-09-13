@@ -2,7 +2,7 @@ import { createIcons, Archive, ArrowUp, ArrowUpRight, Bell, Calendar, Check, Che
 import { t } from '../lib/i18n';
 import { decryptContent } from '../lib/crypto/decrypt';
 
-const text = t(document.body.dataset.locale ?? 'zh');
+const text = t();
 const base = document.body.dataset.base ?? '';
 const $ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => root.querySelector<T>(selector);
 const $$ = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => [...root.querySelectorAll<T>(selector)];

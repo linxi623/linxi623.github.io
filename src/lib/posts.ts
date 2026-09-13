@@ -15,7 +15,7 @@ export async function allPosts() {
 }
 export function selectLocale(posts: Post[], locale: string) {
   const selected = new Map<string, Post>();
-  for (const post of posts.filter((p) => p.data.locale === site.defaultLocale)) selected.set(post.data.link, post);
+  for (const post of posts.filter((p) => p.data.locale === 'zh')) selected.set(post.data.link, post);
   for (const post of posts.filter((p) => p.data.locale === locale)) selected.set(post.data.link, post);
   return [...selected.values()].sort((a, b) =>
     Number(b.data.pinned) - Number(a.data.pinned) || b.data.date.getTime() - a.data.date.getTime(),
@@ -67,7 +67,7 @@ export type View = { locale: string; kind: 'home' | 'posts' | 'archives' | 'cate
 export async function views() {
   const all = await allPosts();
   const result: View[] = [];
-  for (const locale of site.locales) {
+  for (const locale of ['zh']) {
     const posts = selectLocale(all, locale);
     result.push({ locale, kind: 'home', path: '/' });
     for (const kind of ['archives', 'categories', 'tags', 'about'] as const) result.push({ locale, kind, path: `/${kind}/` });

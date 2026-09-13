@@ -27,7 +27,6 @@ async function localAsset(path: string) {
   if (!(await stat(target)).isFile()) throw new Error(`Missing image: ${path}`);
 }
 export async function validateContent() {
-  if (!site.locales.includes(site.defaultLocale) || new Set(site.locales).size !== site.locales.length) throw new Error('Invalid locale configuration.');
   if (siteBase && !/^\/[a-zA-Z0-9_-]+$/.test(siteBase)) throw new Error('Pages base must be empty or a single /repository path.');
   const known = new Set<string>();
   const processor = unified().use(remarkParse).use(remarkDirective).use(remarkEncryptedDirective);
@@ -39,7 +38,7 @@ export async function validateContent() {
   for (const file of await markdownFiles(resolve('src/content/blog'))) {
     const parsed = parseFrontmatter(await readFile(file, 'utf8'));
     const data = parsed.frontmatter;
-    const key = `${data.locale ?? site.defaultLocale}/${data.link}`;
+    const key = `${data.locale ?? 'zh'}/${data.link}`;
     if (known.has(key)) throw new Error(`Duplicate article link: ${key}`);
     known.add(key);
     if ('password' in data) throw new Error(`Never commit passwords in frontmatter: ${file}`);
@@ -51,5 +50,5 @@ export async function validateContent() {
     await processor.run(processor.parse(parsed.content));
     await resourceCheck.render(parsed.content);
   }
-  await Promise.all([site.avatar, site.cover, ...site.friends.map((friend) => friend.image)].map(localAsset));
+  await Promise.all([site.avatar, site.cover].map(localAsset));
 }

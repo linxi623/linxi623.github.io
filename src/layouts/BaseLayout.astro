@@ -5,10 +5,9 @@ import { absolute, localized, withBase, siteBase } from '../lib/urls';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 import '../styles/markdown.css';
-interface Props { title?: string; description?: string; locale?: string; path?: string; image?: string; article?: boolean; articleMeta?: { date: string; updated?: string; words: number; minutes?: number | null }; noindex?: boolean; alternates?: boolean; languagePaths?: Record<string, string> }
-const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, articleMeta, noindex = false, alternates = true, languagePaths } = Astro.props;
-const equivalentLocales = site.locales.filter((lang) => !languagePaths || languagePaths[lang] === path);
-const text = t(locale);
+interface Props { title?: string; description?: string; locale?: string; path?: string; image?: string; article?: boolean; articleMeta?: { date: string; updated?: string; words: number; minutes?: number | null }; noindex?: boolean;  }
+const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, articleMeta, noindex = false } = Astro.props;
+const text = t();
 const coverTitle = title ?? site.title;
 const nav = [
   { label: 'home', href: '/', icon: 'house' },
@@ -34,8 +33,6 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
     <meta name="description" content={description} /><meta name="color-scheme" content="light dark" />
     <title>{pageTitle}</title><link rel="icon" href={withBase('/favicon.svg')} />
     <link rel="canonical" href={new URL(localized(path, locale), site.url).href} />
-    {alternates && equivalentLocales.map((lang) => <link rel="alternate" hreflang={lang} href={new URL(localized(path, lang), site.url).href} />)}
-    {alternates && equivalentLocales.includes(site.defaultLocale) && <link rel="alternate" hreflang="x-default" href={new URL(localized(path, site.defaultLocale), site.url).href} />}
     <link rel="alternate" type="application/rss+xml" title={text.subscribe} href={localized('/rss.xml', locale)} />
     <meta property="og:title" content={pageTitle} /><meta property="og:description" content={description} />
     <meta property="og:type" content={article ? 'article' : 'website'} /><meta property="og:image" content={absolute(image)} />

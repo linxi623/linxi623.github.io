@@ -1,7 +1,6 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
-import { site } from './config/site';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
@@ -11,7 +10,7 @@ const blog = defineCollection({
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
     link: z.string().regex(/^[a-z0-9]+(?:[/-][a-z0-9]+)*$/),
-    locale: z.string().default('zh').refine((value) => site.locales.includes(value), 'Unsupported locale'),
+    locale: z.literal('zh').default('zh'),
     categories: z.array(z.string().min(1)).default([]),
     tags: z.array(z.string().min(1)).default([]),
     series: z.string().optional(),

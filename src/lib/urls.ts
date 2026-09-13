@@ -9,8 +9,8 @@ export function withBase(path = '/', configuredBase = siteBase) {
   return `${base}/${path.replace(/^\/+/, '')}`;
 }
 
-export function localized(path: string, locale = site.defaultLocale) {
-  return withBase(`${locale === site.defaultLocale ? '' : `/${locale}`}/${path.replace(/^\/+/, '')}`);
+export function localized(path: string, _locale = 'zh') {
+  return withBase(path);
 }
 
 export function absolute(path: string) {
