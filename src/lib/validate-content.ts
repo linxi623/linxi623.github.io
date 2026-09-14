@@ -50,5 +50,5 @@ export async function validateContent() {
     await processor.run(processor.parse(parsed.content));
     await resourceCheck.render(parsed.content);
   }
-  await Promise.all([site.avatar, site.cover].map(localAsset));
+  await Promise.all([site.avatar, site.cover, site.logo].map(localAsset));
 }

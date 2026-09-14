@@ -5,6 +5,7 @@ export const site = {
   url: 'https://linxi623.github.io',
   repository: 'https://github.com/linxi623/linxi623.github.io',
   avatar: '/img/avatar.webp',
+  logo: '/img/brand-logo.png',
   cover: '/img/site_header.webp',
   startYear: 2026,
   pageSize: 5,

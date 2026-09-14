@@ -2,7 +2,7 @@
 .prose > :first-child { margin-top: 0; }
 .prose h2 { font-size: 25px; margin: 1.8em 0 .8em; border-bottom: 1px solid var(--line); padding-bottom: .35em; }
 .prose h3 { font-size: 20px; margin-top: 1.7em; }
-.prose h1, .prose h2, .prose h3 { color: var(--ink); letter-spacing: 0; }
+.prose h1, .prose h2, .prose h3 { color: var(--ink); letter-spacing: 0.02em; font-family: "寒蝉全圆体", "寒蝉全圆体 Bold", sans-serif; }
 .prose h2 { border-bottom: 2px solid var(--soft); padding-bottom: .45em; }
 .prose h3 { color: var(--accent); }
 .prose p { margin: 1.1em 0; }

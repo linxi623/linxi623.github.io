@@ -39,6 +39,8 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
     <meta property="og:url" content={new URL(localized(path, locale), site.url).href} /><meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="stylesheet" href={withBase('/katex/katex.min.css')} />
+    <link rel="stylesheet" href={withBase('/fonts/ChillRoundFRegular/result.css')} />
+    <link rel="stylesheet" href={withBase('/fonts/ChillRoundFBold/result.css')} />
     <script is:inline>
       try {
         const theme = localStorage.getItem('linxi-theme');
@@ -54,7 +56,9 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
     <header class="site-header">
       <div class="topbar">
         <button class="icon-button mobile-menu" id="menu-toggle" aria-label={text.home} aria-controls="site-nav" aria-expanded="false" title={text.home}><Icon name="menu" /></button>
-        <a class="header-brand" href={localized('/', locale)}>{site.title}</a>
+        <a class="header-brand" href={localized('/', locale)}>
+          <img src={withBase(site.logo)} alt={site.title} width="555" height="199" />
+        </a>
         <span class="breadcrumb">LINXI / {coverTitle}</span>
         <div class="toolbar">
           <button class="icon-button" id="search-open" title={text.search} aria-label={text.search}><Icon name="search" /></button>
