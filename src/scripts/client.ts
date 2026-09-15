@@ -1,6 +1,7 @@
 import { createIcons, Archive, ArrowUp, ArrowUpRight, Bell, Calendar, Check, ChevronRight, Clock, Copy, Folder, Github, House, Library, Link, LockKeyhole, Maximize, Megaphone, Menu, NotebookPen, Rss, Search, SunMoon, Tags, UserRound, X } from 'lucide';
 import { t } from '../lib/i18n';
 import { decryptContent } from '../lib/crypto/decrypt';
+import './phoebe';
 
 const text = t();
 const base = document.body.dataset.base ?? '';

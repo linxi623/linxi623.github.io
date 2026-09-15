@@ -72,7 +72,13 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
       <div class="cover-overlay"></div>
       <div class="cover-content">
         {path === '/' && <p class="eyebrow">A LITTLE EVERY DAY</p>}
-        <h1 id="cover-title">{coverTitle}</h1>
+        <h1 id="cover-title">
+          {path === '/' ? (
+            <button class="cover-title-trigger" id="phoebe-trigger" type="button" aria-label={`${coverTitle}，菲比啾比`} title="菲比啾比">
+              {coverTitle}
+            </button>
+          ) : coverTitle}
+        </h1>
         {path === '/' && <p>{text.greeting}<br />{text.intro}</p>}
         {article && articleMeta && <div class="cover-meta">
           <span><Icon name="calendar" /> {text.date} {articleMeta.date}</span>
@@ -119,6 +125,7 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
       </div>
     </div>
     <button id="back-top" class="icon-button back-top" title={text.top} aria-label={text.top} hidden><Icon name="arrow-up" /></button>
+    <div class="phoebe-flight-layer" id="phoebe-flight-layer" aria-hidden="true"></div>
     <dialog id="search-dialog" aria-labelledby="search-title"><div class="dialog-heading"><h2 id="search-title">{text.search}</h2><button class="icon-button close-dialog" title={text.close} aria-label={text.close}><Icon name="x" /></button></div><div id="search-container" data-search-placeholder={text.searchPlaceholder}></div><p id="search-status" role="status"></p></dialog>
     <dialog id="image-dialog" aria-label={text.fullscreen}><button class="icon-button close-dialog" title={text.close} aria-label={text.close}><Icon name="x" /></button><img id="lightbox-image" alt="" /></dialog>
     <script>import '../scripts/client';</script>
