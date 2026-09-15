@@ -2,8 +2,8 @@
 import BlogView from '../components/BlogView.astro';
 import { views } from '../lib/posts';
 export async function getStaticPaths() {
-  return (await views()).filter((view) => !(view.locale === 'zh' && ['home', 'about'].includes(view.kind))).map((view) => ({
-    params: { route: (view.locale === 'zh' ? '' : view.locale + '/') + view.path.slice(1, -1) },
+  return (await views()).filter((view) => !['home', 'about'].includes(view.kind)).map((view) => ({
+    params: { route: view.path.slice(1, -1) },
     props: { view },
   }));
 }

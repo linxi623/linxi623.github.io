@@ -1,12 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { localized } from "../lib/urls";
+import { withBase } from "../lib/urls";
 ---
 
 <BaseLayout title="404" noindex>
   <div class="page-heading">
     <p class="eyebrow">404</p><h1>这一页暂时找不到了</h1><p>
       回到首页，看看最近的记录。
-    </p><a class="button" href={localized("/")}>返回首页</a>
+    </p><a class="button" href={withBase("/")}>返回首页</a>
   </div>
 </BaseLayout>

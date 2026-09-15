@@ -9,12 +9,12 @@ import {
   readingMinutes,
   wordCount,
   relatedPosts,
-  selectLocale,
+  sortPosts,
   taxonomyUrl,
   terms,
   type View,
 } from "../lib/posts";
-import { localized, withBase } from "../lib/urls";
+import { withBase } from "../lib/urls";
 import { t } from "../lib/i18n";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "./PostCard.astro";
@@ -23,9 +23,9 @@ interface Props {
   view: View;
 }
 const { view } = Astro.props;
-const { locale, kind, term, path, page = 1, post } = view;
+const { kind, term, path, page = 1, post } = view;
 const text = t();
-const posts = selectLocale(await allPosts(), locale);
+const posts = sortPosts(await allPosts());
 const title = post?.data.title ?? term ?? (kind === 'home' ? undefined : kind === 'post' ? text.posts : text[kind]);
 const rendered = post ? await render(post) : undefined;
 const Content = rendered?.Content;
@@ -67,12 +67,11 @@ const neighbors = post
 
 <BaseLayout
   title={title}
-  locale={locale}
   path={path}
   description={post?.data.description}
   image={post ? cover(post) : site.cover}
   article={kind === "post"}
-  articleMeta={post ? { date: dateLabel(post.data.date, locale), updated: post.data.updated ? dateLabel(post.data.updated, locale) : undefined, words: wordCount(post), minutes: readingMinutes(post) } : undefined}
+  articleMeta={post ? { date: dateLabel(post.data.date), updated: post.data.updated ? dateLabel(post.data.updated) : undefined, words: wordCount(post), minutes: readingMinutes(post) } : undefined}
 >
   {
     kind === "home" && (
@@ -80,7 +79,7 @@ const neighbors = post
         <div class="section-heading">
           <>
             <h2>{text.latest}</h2>
-            <a href={localized("/posts/", locale)}>
+            <a href={withBase("/posts/")}>
               {text.all} <span aria-hidden="true">→</span>
             </a>
           </>
@@ -103,7 +102,7 @@ const neighbors = post
       <>
         <div class="post-list">
           {listed.map((entry) => (
-            <PostCard post={entry} locale={locale} />
+            <PostCard post={entry} />
           ))}
         </div>
         {listed.length === 0 && <p>{text.empty}</p>}
@@ -112,10 +111,7 @@ const neighbors = post
             {page > 1 ? (
               <a
                 class="button secondary"
-                href={localized(
-                  page === 2 ? "/posts/" : `/posts/${page - 1}/`,
-                  locale,
-                )}
+                href={withBase(page === 2 ? "/posts/" : `/posts/${page - 1}/`)}
                 rel="prev"
               >
                 {text.previous}
@@ -129,7 +125,7 @@ const neighbors = post
             {page < pageCount ? (
               <a
                 class="button secondary"
-                href={localized(`/posts/${page + 1}/`, locale)}
+                href={withBase(`/posts/${page + 1}/`)}
                 rel="next"
               >
                 {text.next}
@@ -149,12 +145,12 @@ const neighbors = post
           const name = Array.isArray(item) ? item[0] : item.name;
           const count = Array.isArray(item) ? item[1] : item.count;
           const preview = Array.isArray(item) ? [] : item.posts.slice(0, 3);
-          return <a class="term-card" href={taxonomyUrl(kind, name, locale)}>
+          return <a class="term-card" href={taxonomyUrl(kind, name)}>
             {preview[0] && <img src={cover(preview[0])} alt="" loading="lazy" />}
             <span class="term-card-content">
               <strong>{name}</strong>
               {preview.length > 0 && <span class="term-card-posts">{preview.map((entry) => entry.data.title).join(" · ")}</span>}
-              <span class="meta">{count} {locale === "zh" ? "篇文章" : "posts"}<Icon name="arrow-up-right" /></span>
+              <span class="meta">{count} {text.posts}<Icon name="arrow-up-right" /></span>
             </span>
           </a>;
         })}
@@ -172,9 +168,9 @@ const neighbors = post
               .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
               .filter((entry) => entry.data.date.getFullYear() === year)
               .map((entry) => (
-                <a href={postUrl(entry, locale)}>
+                <a href={postUrl(entry)}>
                   <time datetime={entry.data.date.toISOString()}>
-                    {dateLabel(entry.data.date, locale)}
+                    {dateLabel(entry.data.date)}
                   </time>
                   <span>{entry.data.title}</span>
                   <Icon name="arrow-up-right" />
@@ -251,26 +247,23 @@ const neighbors = post
                 <>
                   <h1 class="article-title-meta" data-pagefind-meta="title">{post.data.title}</h1>
                   <nav class="article-breadcrumb" aria-label="Breadcrumb">
-                    <a class="breadcrumb-home" href={localized("/", locale)}><Icon name="house" /><span>{text.home}</span></a>
-                    {post.data.categories.map((name, index) => <><Icon name="chevron-right" /><a class:list={{ "breadcrumb-current": index === post.data.categories.length - 1 }} href={taxonomyUrl("categories", post.data.categories.slice(0, index + 1).join("/"), locale)}>{name}</a></>)}
+                    <a class="breadcrumb-home" href={withBase("/")}><Icon name="house" /><span>{text.home}</span></a>
+                    {post.data.categories.map((name, index) => <><Icon name="chevron-right" /><a class:list={{ "breadcrumb-current": index === post.data.categories.length - 1 }} href={taxonomyUrl("categories", post.data.categories.slice(0, index + 1).join("/"))}>{name}</a></>)}
                   </nav>
                   <p>{post.data.description}</p>
                 </>
               </header>
-              {post.data.locale !== locale && (
-                <p class="translation-notice">{text.fallback}</p>
-              )}
               <article
                 class="prose"
                 id="article-content"
                 data-pagefind-body
-                lang={post.data.locale}
+                lang="zh-CN"
               >
                 <Content />
               </article>
               <div class="article-end">
                 {post.data.updated && (
-                  <p class="meta">{dateLabel(post.data.updated, locale)}</p>
+                  <p class="meta">{dateLabel(post.data.updated)}</p>
                 )}
                 <div class="tags">
                   {post.data.categories.map((name, index) => (
@@ -278,7 +271,6 @@ const neighbors = post
                       href={taxonomyUrl(
                         "categories",
                         post.data.categories.slice(0, index + 1).join("/"),
-                        locale,
                       )}
                     >
                       {name}
@@ -288,7 +280,7 @@ const neighbors = post
                 <nav class="neighbor-posts">
                   {neighbors.map((entry, index) =>
                     entry ? (
-                      <a href={postUrl(entry, locale)}>
+                      <a href={postUrl(entry)}>
                         <small>{index === 0 ? text.previous : text.next}</small>
                         <strong>{entry.data.title}</strong>
                       </a>
@@ -304,7 +296,7 @@ const neighbors = post
                     </div>
                     <div class="post-list">
                       {related.map((entry) => (
-                        <PostCard post={entry} locale={locale} />
+                        <PostCard post={entry} />
                       ))}
                     </div>
                   </>

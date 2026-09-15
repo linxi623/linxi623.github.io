@@ -12,9 +12,8 @@ import Icon from "./Icon.astro";
 import { placeholder } from "../lib/lqip";
 interface Props {
   post: Post;
-  locale: string;
 }
-const { post, locale } = Astro.props;
+const { post } = Astro.props;
 const text = t();
 const minutes = readingMinutes(post);
 const preview = placeholder(cover(post));
@@ -23,7 +22,7 @@ const preview = placeholder(cover(post));
 <article class="post-card">
   <a
     class="post-image"
-    href={postUrl(post, locale)}
+    href={postUrl(post)}
     tabindex="-1"
     aria-hidden="true"
     style={preview ? `background-image:url("${preview}");background-size:cover` : undefined}
@@ -40,24 +39,24 @@ const preview = placeholder(cover(post));
   <div class="post-card-body">
     <div class="meta">
       {post.data.categories[0] && (
-        <a href={taxonomyUrl("categories", post.data.categories[0], locale)}>
+        <a href={taxonomyUrl("categories", post.data.categories[0])}>
           <Icon name="folder" /> {post.data.categories[0]}
         </a>
       )}
       <time datetime={post.data.date.toISOString()}
-        ><Icon name="calendar" /> {dateLabel(post.data.date, locale)}</time
+        ><Icon name="calendar" /> {dateLabel(post.data.date)}</time
       >{post.data.pinned && <span class="accent">{text.pinned}</span>}{
         post.data.passwordEnv && <Icon name="lock-keyhole" />
       }
     </div>
-    <h3><a href={postUrl(post, locale)}>{post.data.title}</a></h3>
+    <h3><a href={postUrl(post)}>{post.data.title}</a></h3>
     <p>{post.data.description}</p>
     <div class="post-card-footer">
       <div class="tags">
         {
           post.data.tags
             .slice(0, 3)
-            .map((tag) => <a href={taxonomyUrl("tags", tag, locale)}>#{tag}</a>)
+            .map((tag) => <a href={taxonomyUrl("tags", tag)}>#{tag}</a>)
         }
       </div>{
         minutes && (

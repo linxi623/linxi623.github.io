@@ -9,10 +9,6 @@ export function withBase(path = '/', configuredBase = siteBase) {
   return `${base}/${path.replace(/^\/+/, '')}`;
 }
 
-export function localized(path: string, _locale = 'zh') {
-  return withBase(path);
-}
-
 export function absolute(path: string) {
   return new URL(withBase(path), site.url).href;
 }

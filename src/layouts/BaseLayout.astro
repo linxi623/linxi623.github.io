@@ -1,12 +1,12 @@
 ---
 import { site } from '../config/site';
 import { t } from '../lib/i18n';
-import { absolute, localized, withBase, siteBase } from '../lib/urls';
+import { absolute, withBase, siteBase } from '../lib/urls';
 import Icon from '../components/Icon.astro';
 import '../styles/global.css';
 import '../styles/markdown.css';
-interface Props { title?: string; description?: string; locale?: string; path?: string; image?: string; article?: boolean; articleMeta?: { date: string; updated?: string; words: number; minutes?: number | null }; noindex?: boolean;  }
-const { title, description = site.description, locale = 'zh', path = '/', image = site.cover, article = false, articleMeta, noindex = false } = Astro.props;
+interface Props { title?: string; description?: string; path?: string; image?: string; article?: boolean; articleMeta?: { date: string; updated?: string; words: number; minutes?: number | null }; noindex?: boolean;  }
+const { title, description = site.description, path = '/', image = site.cover, article = false, articleMeta, noindex = false } = Astro.props;
 const text = t();
 const coverTitle = title ?? site.title;
 const nav = [
@@ -26,17 +26,17 @@ const articleNavActive = ['/posts/', '/categories/', '/tags/', '/archives/'].som
 const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 的博客`;
 ---
 <!doctype html>
-<html lang={locale} data-seasonal={site.seasonal ? 'true' : undefined}>
+<html lang="zh-CN" data-seasonal={site.seasonal ? 'true' : undefined}>
   <head>
     <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-src 'none'" />}
     <meta name="description" content={description} /><meta name="color-scheme" content="light dark" />
     <title>{pageTitle}</title><link rel="icon" href={withBase('/favicon.svg')} />
-    <link rel="canonical" href={new URL(localized(path, locale), site.url).href} />
-    <link rel="alternate" type="application/rss+xml" title={text.subscribe} href={localized('/rss.xml', locale)} />
+    <link rel="canonical" href={new URL(withBase(path), site.url).href} />
+    <link rel="alternate" type="application/rss+xml" title={text.subscribe} href={withBase('/rss.xml')} />
     <meta property="og:title" content={pageTitle} /><meta property="og:description" content={description} />
     <meta property="og:type" content={article ? 'article' : 'website'} /><meta property="og:image" content={absolute(image)} />
-    <meta property="og:url" content={new URL(localized(path, locale), site.url).href} /><meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:url" content={new URL(withBase(path), site.url).href} /><meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="stylesheet" href={withBase('/katex/katex.min.css')} />
     <link rel="stylesheet" href={withBase('/fonts/ChillRoundFRegular/result.css')} />
@@ -50,13 +50,13 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
       } catch {}
     </script>
   </head>
-  <body data-locale={locale} data-base={siteBase} data-article={article ? 'true' : undefined}>
+  <body data-base={siteBase} data-article={article ? 'true' : undefined}>
     <a class="skip-link" href="#main-content">{text.read}</a>
     <progress id="reading-progress" max="100" value="0" aria-label={text.progress}></progress>
     <header class="site-header">
       <div class="topbar">
         <button class="icon-button mobile-menu" id="menu-toggle" aria-label={text.home} aria-controls="site-nav" aria-expanded="false" title={text.home}><Icon name="menu" /></button>
-        <a class="header-brand" href={localized('/', locale)}>
+        <a class="header-brand" href={withBase('/')}>
           <img src={withBase(site.logo)} alt={site.title} width="555" height="199" />
         </a>
         <span class="breadcrumb">LINXI / {coverTitle}</span>
@@ -91,10 +91,10 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
     </section>
     <div class="page-shell">
       <aside class="sidebar" id="site-nav">
-        <a class="brand" href={localized('/', locale)}><img class="avatar" src={withBase(site.avatar)} alt="Linxi" width="64" height="64" /><span class="brand-name">{site.title}</span><span class="eyebrow">LINXI'S JOURNAL</span></a>
+        <a class="brand" href={withBase('/')}><img class="avatar" src={withBase(site.avatar)} alt="Linxi" width="64" height="64" /><span class="brand-name">{site.title}</span><span class="eyebrow">LINXI'S JOURNAL</span></a>
         <p class="sidebar-intro">{text.intro}</p>
         <nav aria-label={text.home}>
-          {nav.map((item) => item.children ? (
+          {nav.map((item) => 'children' in item ? (
             <details class="nav-group" open={articleNavActive}>
               <summary class:list={{ active: articleNavActive }}>
                 <Icon name={item.icon} /><span>{text[item.label]}</span>
@@ -102,16 +102,16 @@ const pageTitle = title ? `${title} · ${site.title}` : `${site.title} · Linxi 
               <div class="nav-subnav">
                 {item.children.map((child) => {
                   const active = path.startsWith(child.href);
-                  return <a href={localized(child.href, locale)} class:list={{ active }} aria-current={active ? 'page' : undefined}><Icon name={child.icon} /><span>{text[child.label]}</span></a>;
+                  return <a href={withBase(child.href)} class:list={{ active }} aria-current={active ? 'page' : undefined}><Icon name={child.icon} /><span>{text[child.label]}</span></a>;
                 })}
               </div>
             </details>
           ) : (
-            <a href={localized(item.href, locale)} class:list={{ active: item.href === '/' ? path === '/' : path.startsWith(item.href) }} aria-current={(item.href === '/' ? path === '/' : path.startsWith(item.href)) ? 'page' : undefined}><Icon name={item.icon} /><span>{text[item.label]}</span></a>
+            <a href={withBase(item.href)} class:list={{ active: item.href === '/' ? path === '/' : path.startsWith(item.href) }} aria-current={(item.href === '/' ? path === '/' : path.startsWith(item.href)) ? 'page' : undefined}><Icon name={item.icon} /><span>{text[item.label]}</span></a>
           ))}
         </nav>
         <div class="sidebar-bottom">
-          <a href={localized('/rss.xml', locale)} class="icon-button" title={text.subscribe} aria-label={text.subscribe}><Icon name="rss" /></a>
+          <a href={withBase('/rss.xml')} class="icon-button" title={text.subscribe} aria-label={text.subscribe}><Icon name="rss" /></a>
           <a href={site.repository} class="icon-button" title={text.source} aria-label={text.source}><Icon name="github" /></a>
           <span>{text.footer}</span>
         </div>

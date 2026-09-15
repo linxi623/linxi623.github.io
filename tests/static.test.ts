@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { encryptContent } from '../src/lib/crypto/encrypt';
 import { decryptContent } from '../src/lib/crypto/decrypt';
 import { rehypeEncrypt, remarkEncryptedDirective, rehypeLocalAssets } from '../src/lib/markdown/static-plugins';
-import { withBase, localized, absolute, siteBase } from '../src/lib/urls';
+import { withBase, absolute, siteBase } from '../src/lib/urls';
 import { preprocessShokaSyntax } from '../src/lib/markdown/shoka-preprocessor';
 import { renderAudioMedia } from '../src/lib/markdown/shoka-renderers';
 import { unified } from 'unified';
@@ -16,8 +16,7 @@ test('project Pages paths are prefixed exactly once', () => {
   assert.equal(withBase('/img/avatar.webp', '/Blog'), '/Blog/img/avatar.webp');
   assert.equal(withBase('/Blog/img/avatar.webp', '/Blog'), '/Blog/img/avatar.webp');
   assert.equal(withBase('/img/avatar.webp', ''), '/img/avatar.webp');
-  assert.equal(localized('/posts/', 'en'), `${siteBase}/en/posts/`);
-  assert.equal(localized('/'), `${siteBase}/`);
+  assert.equal(withBase('/posts/'), `${siteBase}/posts/`);
   assert.equal(absolute('/rss.xml'), `https://linxi623.github.io${siteBase}/rss.xml`);
   assert.equal(withBase('https://example.com'), 'https://example.com');
 });

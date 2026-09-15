@@ -38,7 +38,7 @@ export async function validateContent() {
   for (const file of await markdownFiles(resolve('src/content/blog'))) {
     const parsed = parseFrontmatter(await readFile(file, 'utf8'));
     const data = parsed.frontmatter;
-    const key = `${data.locale ?? 'zh'}/${data.link}`;
+    const key = String(data.link);
     if (known.has(key)) throw new Error(`Duplicate article link: ${key}`);
     known.add(key);
     if ('password' in data) throw new Error(`Never commit passwords in frontmatter: ${file}`);

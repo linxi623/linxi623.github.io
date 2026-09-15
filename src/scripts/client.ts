@@ -106,7 +106,7 @@ searchInput.addEventListener('input', () => {
       }
     } catch {
       indexPromise = undefined;
-      if (version === searchVersion) status.textContent = document.body.dataset.locale === 'zh' ? '搜索暂不可用。' : 'Search is unavailable.';
+      if (version === searchVersion) status.textContent = '搜索暂不可用。';
     }
   }, 180);
 });

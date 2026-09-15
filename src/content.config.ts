@@ -10,7 +10,6 @@ const blog = defineCollection({
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
     link: z.string().regex(/^[a-z0-9]+(?:[/-][a-z0-9]+)*$/),
-    locale: z.literal('zh').default('zh'),
     categories: z.array(z.string().min(1)).default([]),
     tags: z.array(z.string().min(1)).default([]),
     series: z.string().optional(),
