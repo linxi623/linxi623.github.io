@@ -29,3 +29,6 @@ test-results/
 
 # jetbrains setting folder
 .idea/
+
+# test
+.feibijiubi/

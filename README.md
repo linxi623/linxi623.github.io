@@ -1,19 +1,12 @@
 # Linxi Blog · 小春日和
 
-基于 Astro 的个人静态博客，**仅部署到 GitHub Pages，不需要额外 API 或运行时后端**。
+基于 Astro 的个人静态博客，**仅部署到 GitHub Pages**。
 
 ## 原作者与项目来源
 
 **本项目引用并改编自 [cosine / cosZone](https://github.com/cosZone) 的 [Astro Koharu](https://github.com/cosZone/astro-koharu)，不是从零原创的博客主题。**
 
-迁移参考 `learning_blog/astro-koharu` 的 6.3.0 版本。复用了上游的 Shoka Markdown 插件、AES-GCM 加解密实现、头像、封面和 KaTeX 静态资源；Linxi Blog 的页面组织、静态部署限制、浏览器交互及测试是在这些基础上的适配。感谢原作者！
-
-- 上游博客：[余弦の博客](https://blog.cosine.ren)
-- 保留原始 [AGPL-3.0 许可证](LICENSE)。
-- 具体来源、修改说明和资源说明见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
-- 本项目不代表原作者，也不是上游官方发行版。
-
-![首页使用的本地封面](public/img/site_header_800.webp)
+![首页使用的本地封面](public/img/site_header.webp)
 
 ## 开始使用
 
@@ -68,9 +61,8 @@ npm run new -- --title "我的第一篇笔记" --slug first-note
 
 唯一发布入口为 `.github/workflows/deploy.yml`，只上传 `dist/`。
 
-站点配置集中在 `src/config/site.ts`。当前配置是用户站点 `https://linxi623.github.io`，没有项目路径前缀。如果发布到项目仓库 `Blog`，必须加上 `base: '/Blog'` 并将 `repository` 改为对应仓库地址。
+站点配置集中在 `src/config/site.ts`。当前配置是用户站点 `https://linxi623.github.io`。
 
-**迁移时发现本地 Git 远端仍为 `linxi623/Blog`，而站点配置已改为 `linxi623/linxi623.github.io`。推送前请确认最终仓库；本次未擅自修改远端或执行发布。** 工作流会检查仓库与路径，避免误发布。
 
 ## 检查
 
