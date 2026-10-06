@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { encryptContent } from '../src/lib/crypto/encrypt';
 import { decryptContent } from '../src/lib/crypto/decrypt';
-import { rehypeEncrypt, remarkEncryptedDirective, rehypeLocalAssets } from '../src/lib/markdown/static-plugins';
+import { rehypeEncrypt, remarkEncryptedDirective, remarkPublicAssets, rehypeLocalAssets } from '../src/lib/markdown/static-plugins';
 import { withBase, absolute, siteBase } from '../src/lib/urls';
 import { preprocessShokaSyntax } from '../src/lib/markdown/shoka-preprocessor';
 import { renderAudioMedia } from '../src/lib/markdown/shoka-renderers';
@@ -11,6 +11,9 @@ import remarkParse from 'remark-parse';
 import remarkDirective from 'remark-directive';
 import type { Root } from 'hast';
 import { VFile } from 'vfile';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
 test('project Pages paths are prefixed exactly once', () => {
   assert.equal(withBase('/img/avatar.webp', '/Blog'), '/Blog/img/avatar.webp');
@@ -63,4 +66,24 @@ test('raw article resources reject missing files, third-party hosts and embedded
   }
   const script: Root = { type: 'root', children: [{ type: 'element', tagName: 'script', properties: {}, children: [] }] };
   assert.throws(() => rehypeLocalAssets()(script), /not supported/);
+});
+test('relative public images render as static URLs without Astro image imports', async () => {
+  const processor = await createMarkdownProcessor({
+    syntaxHighlight: false,
+    remarkPlugins: [remarkPublicAssets],
+    rehypePlugins: [rehypeLocalAssets],
+  });
+  const fileURL = pathToFileURL(resolve('src/content/blog/example.md'));
+  const { code, metadata } = await processor.render(
+    '![inline](../../../public/img/avatar.webp?version=1#preview)\n\n![reference][avatar]\n\n[avatar]: ../../../public/img/avatar.webp\n\n```md\n![literal](missing.png)\n```',
+    { fileURL },
+  );
+  assert.ok(code.includes(`src="${siteBase}/img/avatar.webp?version=1#preview"`));
+  assert.ok(code.includes(`src="${siteBase}/img/avatar.webp"`));
+  assert.deepEqual(metadata.localImagePaths, []);
+  assert.ok(code.includes('![literal](missing.png)'));
+  for (const path of ['../../../public/img/missing.png', '../img/image.png', '../../../package.json', 'https://example.com/a.png', '//example.com/a.png']) {
+    await assert.rejects(processor.render(`![invalid](${path})`, { fileURL }), /local asset|public/i);
+  }
+  await assert.rejects(processor.render('![invalid](../../../public/img/avatar.webp)'), /Markdown file path/);
 });

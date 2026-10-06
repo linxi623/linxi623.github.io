@@ -13,7 +13,7 @@ import { remarkShokaRuby } from './src/lib/markdown/remark-shoka-ruby.ts';
 import { remarkShokaSpoiler } from './src/lib/markdown/remark-shoka-spoiler.ts';
 import { rehypeShokaAttrs } from './src/lib/markdown/rehype-shoka-attrs.ts';
 import { shokaMetaTransformer } from './src/lib/markdown/shiki-meta-transformer.ts';
-import { remarkEncryptedDirective, rehypeEncrypt, rehypeLocalAssets } from './src/lib/markdown/static-plugins.ts';
+import { remarkEncryptedDirective, remarkPublicAssets, rehypeEncrypt, rehypeLocalAssets } from './src/lib/markdown/static-plugins.ts';
 import { validateContent } from './src/lib/validate-content.ts';
 import { generatePlaceholders } from './src/lib/lqip.ts';
 
@@ -34,7 +34,7 @@ export default defineConfig({
       remarkPlugins: [
         [remarkShokaPreprocess, { enableEncryptedBlock: true }],
         remarkMath, remarkIns, remarkMark, remarkShokaRuby, remarkShokaSpoiler,
-        remarkDirective, remarkEncryptedDirective,
+        remarkDirective, remarkEncryptedDirective, remarkPublicAssets,
       ],
       rehypePlugins: [rehypeRaw, rehypeShokaAttrs, rehypeKatex, rehypeLocalAssets, rehypeEncrypt],
     }),

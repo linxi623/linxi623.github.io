@@ -42,6 +42,8 @@ npm run new -- --title "我的第一篇笔记" --slug first-note
 
 文章写入 `src/content/blog/zh/first-note.md`，默认为草稿。编辑正文、摘要和标签，发布时将 `draft` 改为 `false`，再构建并推送。
 
+文章配图统一放在 `public/img/blog/<文章名>/` 下，与头像、封面等站点图片分开。正文使用从 Markdown 文件到图片的相对路径，以便在编辑器中预览。例如，`src/content/blog/computer.md` 中可写 `![图片](../../../public/img/blog/computer/image.png)`；构建时会自动转换为站点地址 `/img/blog/computer/image.png`。
+
 ## 功能
 
 - Markdown 文章、草稿、置顶、分页、归档、多级分类、标签、系列和相关文章。

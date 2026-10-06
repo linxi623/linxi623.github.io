@@ -4,8 +4,8 @@ import type { Node } from 'unist';
 import type { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
 import { toHtml } from 'hast-util-to-html';
-import { existsSync } from 'node:fs';
-import { resolve, sep } from 'node:path';
+import { existsSync, statSync } from 'node:fs';
+import { dirname, relative, resolve, sep } from 'node:path';
 import { encryptContent } from '../crypto/encrypt';
 import { withBase, siteBase } from '../urls';
 
@@ -14,6 +14,28 @@ function secret(name: string) {
     throw new Error(`Encrypted content requires build environment variable: ${name}`);
   }
   return process.env[name]!;
+}
+
+export function remarkPublicAssets() {
+  return (tree: MdRoot, file: VFile) => {
+    const imageReferences = new Set<string>();
+    visit(tree, 'imageReference', (node) => { imageReferences.add(node.identifier); });
+    visit(tree, (node) => {
+      if (node.type !== 'image' && !(node.type === 'definition' && imageReferences.has(node.identifier))) return;
+      const value = node.url;
+      if (/^(?:\/|#|[a-z][a-z\d+.-]*:)/i.test(value)) return;
+      if (!file.path) throw new Error(`Relative article images require a Markdown file path: ${value}`);
+      const pathname = value.split(/[?#]/, 1)[0];
+      const root = resolve('public');
+      const target = resolve(dirname(file.path), decodeURIComponent(pathname));
+      if (!target.startsWith(root + sep)) {
+        throw new Error(`Keep article assets in public/: ${value}`);
+      }
+      if (!existsSync(target) || !statSync(target).isFile()) throw new Error(`Missing local asset: ${value}`);
+      // Convert before Astro collects image imports, so public files stay static assets.
+      node.url = withBase(`/${relative(root, target).split(sep).map(encodeURIComponent).join('/')}${value.slice(pathname.length)}`);
+    });
+  };
 }
 
 export function remarkEncryptedDirective() {

@@ -6,14 +6,14 @@ link: computer
 categories: ['杂谈']
 tags: ['电脑']
 cover: /img/cover/1.webp
-draft: true
+draft: false
 ---
 
 ## 电脑内存优化+实用工具
 
 在使用 Windows 的过程中，经常遇到一开机就占用一半内存的情况。对于我这种用轻薄本的核显打游戏的人来说，这更是灾难，于是我捣鼓出了一些门道。
 
-![alt text](image.png)
+![优化后的常驻内存占用](../../../public/img/blog/computer/image.png)
 这是优化后的常驻内存占用，优化前应该在 40% 左右。现在这样已经让我很满意了，其中还有不少内存是被我为了美化桌面而保留的软件占用的。~~（占用最多的就是小风车了）~~
 
 - **启动优化：** 这是效果最显著的方式了。很多流氓软件会强制开机自启，平时很少用到的软件，就可以关闭它们的自启动。
@@ -25,7 +25,7 @@ draft: true
         3. 熟悉这些服务的朋友，可以根据服务描述调整它们的启动类型；不懂的可以去问问 DS 或 GPT。
     
     下面是具体的界面：
-    ![alt text](image-1.png)
+    ![Windows 服务面板](../../../public/img/blog/computer/image-1.png)
 
 - **运行优化：** Windows 开机之后，各种缓存会占用内存空间。这里我推荐一款工具：[MemReduct](https://github.com/henrypp/memreduct)。它用起来超级方便，下载后不用更改设置就能使用。当然，也可以设置一个快捷键，时不时清理一下，是释放内存的一把好手。
 

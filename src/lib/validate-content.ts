@@ -1,10 +1,11 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, join, sep } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parseFrontmatter, createMarkdownProcessor } from '@astrojs/markdown-remark';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkDirective from 'remark-directive';
-import { remarkEncryptedDirective, rehypeLocalAssets } from './markdown/static-plugins';
+import { remarkEncryptedDirective, remarkPublicAssets, rehypeLocalAssets } from './markdown/static-plugins';
 import { remarkShokaPreprocess } from './markdown/remark-shoka-preprocess';
 import rehypeRaw from 'rehype-raw';
 import { site } from '../config/site';
@@ -32,7 +33,7 @@ export async function validateContent() {
   const processor = unified().use(remarkParse).use(remarkDirective).use(remarkEncryptedDirective);
   const resourceCheck = await createMarkdownProcessor({
     syntaxHighlight: false,
-    remarkPlugins: [[remarkShokaPreprocess, { enableEncryptedBlock: true }], remarkDirective, remarkEncryptedDirective],
+    remarkPlugins: [[remarkShokaPreprocess, { enableEncryptedBlock: true }], remarkDirective, remarkEncryptedDirective, remarkPublicAssets],
     rehypePlugins: [rehypeRaw, rehypeLocalAssets],
   });
   for (const file of await markdownFiles(resolve('src/content/blog'))) {
@@ -48,7 +49,7 @@ export async function validateContent() {
     }
     if (data.cover) await localAsset(data.cover);
     await processor.run(processor.parse(parsed.content));
-    await resourceCheck.render(parsed.content);
+    await resourceCheck.render(parsed.content, { fileURL: pathToFileURL(file) });
   }
   await Promise.all([site.avatar, site.cover, site.logo].map(localAsset));
 }
